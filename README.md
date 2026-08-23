@@ -331,7 +331,7 @@ yarn lint                # 代码检查
 | `GARMIN_GLOBAL_USERNAME` | 国际区账号 | - |
 | `GARMIN_GLOBAL_PASSWORD` | 国际区密码 | - |
 | `AESKEY` | 数据库加密密钥 | - |
-| `GARMIN_SYNC_NUM` | 每次同步检查的活动数量 | 10 |
+| `GARMIN_SYNC_NUM` | 每次同步检查的活动数��� | 10 |
 | `GARMIN_SYNC_DELAY` | 同步延迟时间（毫秒） | 2000 |
 | `GARMIN_REQUEST_TIMEOUT` | HTTP 请求超时（毫秒） | 30000 |
 | `GARMIN_MIGRATE_NUM` | 每次迁移的活动数量 | 200 |
@@ -373,7 +373,7 @@ yarn health:global2cn
 连续失败: 0 次
 最后成功: 2026-06-30T08:00:12.345Z
 最后失败: 2026-06-28T14:00:05.123Z
-────────────────────────────────────────
+──────��─────────────────────────────────
 ```
 
 ### 连续失败保护
@@ -406,7 +406,7 @@ GarminActivitiesSync/
 │   │   ├── notification.ts     # 通知服务
 │   │   └── rq-sync.ts          # RQ 同步服务
 │   ├── utils/                  # 工具函数
-│   │   ├── database.ts         # SQLite 数据库
+���   │   ├── database.ts         # SQLite 数据库
 │   │   ├── crypto.ts           # 加密工具
 │   │   ├── logger.ts           # 日志工具
 │   │   ├── validation.ts       # 输入验证（Zod）
@@ -497,7 +497,7 @@ ping sso.garmin.cn
 
 ### Q: 如何修改定时执行频率？
 
-**GitHub Actions**：编辑 `.github/workflows/` 下对应的 workflow 文件中的 `cron` 表达式：
+**GitHub Actions**：编辑 `.github/workflows/` 下对应的 workflow 文件中的 `cron` ��达式：
 
 ```yaml
 schedule:
@@ -534,13 +534,13 @@ CRON_SCHEDULE=0 */2 * * *  # 每 2 小时执行一次
 
 **调优：**
 
-- ⏱️ **兜底频率从每日调整为每 3 小时**：上线首日实测发现每日一次的兜底间隔过于保守（对比原来每小时轮询、几乎是量级差异），但事件驱动本身已能覆盖绝大多数场景，用每 3 小时（`cron: "30 */3 * * *"`）替代——相比原来的每小时轮询，运行次数从 24 次/天降到 8 次/天，同时把"webhook 漏掉时最坏要等多久"从 24 小时收窄到大致 3 小时量级（但见下条，实际会更长）
+- ⏱️ **兜底频率从每日调整为每 3 小时**：上线首日实测发现每日一次的兜底间隔过于保守（对比原来每小时轮询、几乎是量级差异），但事件驱动本身已能覆盖绝大多数场景，用每 3 小时（`cron: "30 */3 * * *"`）替代——相比原来的每小时轮询，运行次数从 24 次/天降到 8 次/天，同时把"webhook 漏掉时最坏要等多久"从 24 小时收窄到大致 3 小时量级（但见下条，实际会更长���
 
 **踩坑记录（真实生产事故）：**
 
 - ⚠️ **GitHub `schedule` 触发本身不准时，"3 小时"是乐观估计**：改完当天实测验证兜底调度，09:30 UTC 该触发的一次直到 10:54 UTC 才跑（延迟 84 分钟），另一次也观察到 36 分钟延迟。已排除是配置问题——GitHub 上生效的 workflow 文件、Actions 权限、启用状态三项均核实无误，运行本身执行也完全正确，纯粹是 GitHub Actions 免费层调度队列的已知限制（官方文档承认高负载时会显著延迟），`:30` 错峰未能完全避免。真实的兜底最坏延迟 = 3 小时 cron 间隔 + GitHub 当时的调度积压，不是文档最初写的严格 3 小时上限。事件驱动主链路（`repository_dispatch`）不受此问题影响，全程秒级响应
 
-- 🐛 **上线当天 Strava webhook 完全空转**：`repository_dispatch` 触发、Worker 鉴权/过滤、Strava 订阅创建等全部验证通过，但用户实测两条真实活动均未同步。根因是部署时漏做了「一次性配置步骤」里的 OAuth 授权（运动员从未真正授权应用访问自己的数据），导致 Strava 服务端从不给这个应用推送任何事件——订阅"活着"，但从未收到过一条真实事件。这个问题**无法靠模拟 curl 请求发现**，只有真实活动才能验证。补做授权后，手动重跑同步补传了两条遗漏活动，随后一次真实力量训练验证了全自动链路（约 2 分钟延迟）。详见 [`trigger/README.md`](./trigger/README.md) 的踩坑记录
+- 🐛 **上线当天 Strava webhook 完全空转**：`repository_dispatch` 触发、Worker 鉴权/过滤、Strava 订阅创建等全部验证通过，但用户实测两条真实活动均未同步。根因是部署时漏做了「一次性配置步骤」里的 OAuth 授权（运动员从未真正授权应用访问自己的数据），导致 Strava 服务端从不给这个应用推送任何事件——订阅"活着"，但从未收到过一条真实事件。这个问题**无法靠模拟 curl 请求发现**，只有真实活动才能验证。补做授���后，手动重跑同步补传了两条遗漏活动，随后一次真实力量训练验证了全自动链路（约 2 分钟延迟）。详见 [`trigger/README.md`](./trigger/README.md) 的踩坑记录
 
 ### v2.5.0 (2026-07-12)
 
@@ -554,7 +554,7 @@ CRON_SCHEDULE=0 */2 * * *  # 每 2 小时执行一次
 
 **踩坑记录：**
 
-- 曾计划引入第三方 `gautamkrishnar/keepalive-workflow` action 防止 60 天无提交导致 `schedule` 被 GitHub 自动禁用，但该 action 仓库已不可解析（`Repository access blocked`），会导致每次运行直接失败于 "Set up job"。已移除；60 天保活改为依赖仓库持续活跃提交 + GitHub 禁用前的邮件预警（不影响 `repository_dispatch`，只影响每日兜底）
+- 曾计划引入第三方 `gautamkrishnar/keepalive-workflow` action 防止 60 天无提交导致 `schedule` 被 GitHub 自动禁用，但该 action 仓库已不可解析（`Repository access blocked`），会导致每次运行直接失败于 "Set up job"。已移除；60 天保活改为依赖仓库持续活跃提�� + GitHub 禁用前的邮件预警（不影响 `repository_dispatch`，只影响每日兜底）
 
 详见 [`trigger/README.md`](./trigger/README.md)。
 
@@ -594,7 +594,7 @@ CRON_SCHEDULE=0 */2 * * *  # 每 2 小时执行一次
 **全面核心优化 (15项改进)：**
 
 **可靠性：**
-- 同步判断升级：使用本地数据库 `activityId` 完全取代旧的时间对比逻辑，彻底消除时区与重复上传问题
+- 同步判断升级：使用本地数据库 `activityId` 完全取代旧���时间对比逻辑，彻底消除时区与重复上传问题
 - 迁移支持断点续传：进度自动存入数据库，中断重试不再从头开始
 - 智能重试与限流：下载/上传全面集成 `RateLimiter`，并使用带超时和指数退避的统一 `withRetry` 机制
 - 断点逃生：完美处理并记录目标端已存在活动引发的 `409 Conflict`，保证任务继续运行
@@ -661,3 +661,8 @@ CRON_SCHEDULE=0 */2 * * *  # 每 2 小时执行一次
 感谢以下 AI 工具的帮助，本项目展示了 AI 辅助编程的能力，从代码审查、问题诊断到修复实现，全程由 AI 完成：
 - **[Antigravity]** - v2.3.0 核心逻辑重构、去重机制升级、GitHub Actions 自动化测试与发版
 - **[Claude Code]** - v2.4.0 可靠性增强、健康度监控、Docker 定时同步、代码验证；v2.4.1 session 续期回归修复
+
+
+---
+
+> Sync setup initialized 2026-08-23
