@@ -56,9 +56,8 @@ export const syncActivities = async (
   // ===== 预检：网络连通性 =====
   try {
     await runPreflight(sourceRegion, targetRegion);
-  } catch (preflightError) {
-    await recordSyncFailure(sourceRegion, targetRegion, `预检失败: ${preflightError}`);
-    throw preflightError;
+    } catch (preflightError) {
+    logger.warn(`预检未通过，继续尝试实际登录: ${preflightError}`);
   }
 
   const sourceClient = await createGarminClient(sourceRegion);
